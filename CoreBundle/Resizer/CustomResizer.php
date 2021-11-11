@@ -26,13 +26,18 @@ class CustomResizer implements ResizerInterface {
     protected $mode;
     protected $metadata;
 
+    private $thumbnails = [
+        'inset' => ImageInterface::THUMBNAIL_INSET,
+        'outbound' => ImageInterface::THUMBNAIL_OUTBOUND,
+    ];
+
     /**
      * @param ImagineInterface $adapter
      * @param string $mode
      */
     public function __construct(ImagineInterface $adapter, $mode, MetadataBuilderInterface $metadata) {
         $this->adapter = $adapter;
-        $this->mode = $mode;
+        $this->mode = isset($this->thumbnails[$mode]) ? $this->thumbnails[$mode] : $mode;
         $this->metadata = $metadata;
     }
 
@@ -47,8 +52,8 @@ class CustomResizer implements ResizerInterface {
         $image = $this->adapter->load($in->getContent());
 
         $content = $image
-                ->thumbnail($this->getBox($media, $settings), $this->mode)
-                ->get($format, array('quality' => $settings['quality']));
+            ->thumbnail($this->getBox($media, $settings), $this->mode)
+            ->get($format, array('quality' => $settings['quality']));
 
         $out->setContent($content, $this->metadata->get($media, $out->getName()));
     }
